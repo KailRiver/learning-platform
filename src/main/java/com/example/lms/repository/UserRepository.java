@@ -1,4 +1,14 @@
 package com.example.lms.repository;
 
-public class UserRepository {
+import com.example.lms.entity.User;
+import com.example.lms.entity.Role;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.Optional;
+import java.util.List;
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByEmail(String email);
+    List<User> findByRole(Role role);
 }
