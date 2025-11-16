@@ -31,7 +31,6 @@ public class CourseService {
         return courseRepository.findAll();
     }
 
-    // Новый метод для получения курсов как DTO
     @Transactional(readOnly = true)
     public List<CourseDTO> getAllCoursesDTO() {
         return courseRepository.findAll().stream()

@@ -1,4 +1,3 @@
-// TestDataLoader.java
 package com.example.lms.config;
 
 import com.example.lms.entity.*;

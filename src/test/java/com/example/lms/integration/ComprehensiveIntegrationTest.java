@@ -107,7 +107,6 @@ public class ComprehensiveIntegrationTest {
         course.setCategory(category);
         Course savedCourse = courseService.saveCourse(course);
 
-        // Этот тест должен работать в транзакции
         assertNotNull(savedCourse.getModules());
         assertEquals(0, savedCourse.getModules().size());
     }

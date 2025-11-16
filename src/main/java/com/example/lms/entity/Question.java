@@ -12,7 +12,7 @@ public class Question {
     private Long id;
 
     private String text;
-    private String type; // SINGLE_CHOICE / MULTIPLE_CHOICE
+    private String type;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id")
