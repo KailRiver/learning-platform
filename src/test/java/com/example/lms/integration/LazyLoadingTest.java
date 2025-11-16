@@ -5,6 +5,7 @@ import com.example.lms.service.CourseService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 import org.hibernate.LazyInitializationException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,29 +18,35 @@ public class LazyLoadingTest {
 
     @Test
     void testLazyInitializationException() {
-        // Создаем и сохраняем курс с модулями
+        // Создаем и сохраняем курс
         Course course = new Course();
         course.setTitle("Test Course");
         course.setDescription("Test Description");
 
         Course savedCourse = courseService.saveCourse(course);
 
-        // Пытаемся получить модули вне транзакции
+        // Открываем новую транзакцию только для получения курса
+        Course detachedCourse = getCourseDetached(savedCourse.getId());
+
+        // Пытаемся получить модули вне транзакции - должно выбросить исключение
         assertThrows(LazyInitializationException.class, () -> {
-            // Этот вызов выбросит исключение, так как сессия закрыта
-            int moduleCount = savedCourse.getModules().size();
+            int moduleCount = detachedCourse.getModules().size();
         });
+    }
+
+    @Transactional
+    protected Course getCourseDetached(Long courseId) {
+        // Получаем курс в рамках транзакции, но возвращаем отсоединенный объект
+        return courseService.getCourseWithDetails(courseId);
     }
 
     @Test
     void testLazyLoadingWithTransactional() {
-        // Этот тест должен работать, так как выполняется в транзакции
         Course course = new Course();
         course.setTitle("Another Test Course");
 
         Course savedCourse = courseService.saveCourse(course);
 
-        // В рамках транзакции можем обращаться к ленивым коллекциям
         assertNotNull(savedCourse.getModules());
         assertEquals(0, savedCourse.getModules().size());
     }

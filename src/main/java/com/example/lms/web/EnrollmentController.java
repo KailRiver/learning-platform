@@ -23,30 +23,50 @@ public class EnrollmentController {
     }
 
     @PostMapping
-    public ResponseEntity<Enrollment> enrollStudent(
+    public ResponseEntity<?> enrollStudent(
             @RequestParam Long studentId,
             @RequestParam Long courseId) {
         try {
             Enrollment enrollment = enrollmentService.enrollStudent(studentId, courseId);
             return ResponseEntity.ok(enrollment);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @GetMapping("/student/{studentId}")
-    public ResponseEntity<List<EnrollmentDTO>> getStudentEnrollments(@PathVariable Long studentId) {
-        List<EnrollmentDTO> enrollments = enrollmentService.getStudentEnrollments(studentId).stream()
-                .map(dtoMapper::toEnrollmentDTO)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(enrollments);
+    public ResponseEntity<?> getStudentEnrollments(@PathVariable Long studentId) {
+        try {
+            List<EnrollmentDTO> enrollments = enrollmentService.getStudentEnrollments(studentId).stream()
+                    .map(dtoMapper::toEnrollmentDTO)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(enrollments);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
+        }
     }
 
     @GetMapping("/course/{courseId}")
-    public ResponseEntity<List<EnrollmentDTO>> getCourseEnrollments(@PathVariable Long courseId) {
-        List<EnrollmentDTO> enrollments = enrollmentService.getCourseEnrollments(courseId).stream()
-                .map(dtoMapper::toEnrollmentDTO)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(enrollments);
+    public ResponseEntity<?> getCourseEnrollments(@PathVariable Long courseId) {
+        try {
+            List<EnrollmentDTO> enrollments = enrollmentService.getCourseEnrollments(courseId).stream()
+                    .map(dtoMapper::toEnrollmentDTO)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(enrollments);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping
+    public ResponseEntity<?> unenrollStudent(
+            @RequestParam Long studentId,
+            @RequestParam Long courseId) {
+        try {
+            enrollmentService.unenrollStudent(studentId, courseId);
+            return ResponseEntity.ok().body("Student unenrolled successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

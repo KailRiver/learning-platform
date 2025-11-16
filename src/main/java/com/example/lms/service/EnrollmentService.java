@@ -49,12 +49,16 @@ public class EnrollmentService {
         return enrollmentRepository.save(enrollment);
     }
 
+    @Transactional(readOnly = true)
     public List<Enrollment> getStudentEnrollments(Long studentId) {
-        return enrollmentRepository.findByStudentId(studentId);
+        // Используем метод с JOIN FETCH для загрузки всех связей
+        return enrollmentRepository.findByStudentIdWithDetails(studentId);
     }
 
+    @Transactional(readOnly = true)
     public List<Enrollment> getCourseEnrollments(Long courseId) {
-        return enrollmentRepository.findByCourseId(courseId);
+        // Используем метод с JOIN FETCH для загрузки всех связей
+        return enrollmentRepository.findByCourseIdWithDetails(courseId);
     }
 
     public void unenrollStudent(Long studentId, Long courseId) {

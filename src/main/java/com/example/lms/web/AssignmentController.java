@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/assignments")
@@ -31,7 +32,7 @@ public class AssignmentController {
     }
 
     @PostMapping("/{assignmentId}/submit")
-    public ResponseEntity<Submission> submitAssignment(
+    public ResponseEntity<?> submitAssignment(
             @PathVariable Long assignmentId,
             @RequestParam Long studentId,
             @RequestParam String content) {
@@ -39,7 +40,22 @@ public class AssignmentController {
             Submission submission = assignmentService.submitAssignment(assignmentId, studentId, content);
             return ResponseEntity.ok(submission);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{assignmentId}/submit-json")
+    public ResponseEntity<?> submitAssignmentJson(
+            @PathVariable Long assignmentId,
+            @RequestBody Map<String, Object> request) {
+        try {
+            Long studentId = Long.valueOf(request.get("studentId").toString());
+            String content = (String) request.get("content");
+
+            Submission submission = assignmentService.submitAssignment(assignmentId, studentId, content);
+            return ResponseEntity.ok(submission);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
@@ -50,7 +66,7 @@ public class AssignmentController {
     }
 
     @PostMapping("/submissions/{submissionId}/grade")
-    public ResponseEntity<Submission> gradeSubmission(
+    public ResponseEntity<?> gradeSubmission(
             @PathVariable Long submissionId,
             @RequestParam Integer score,
             @RequestParam String feedback) {
@@ -58,7 +74,7 @@ public class AssignmentController {
             Submission submission = assignmentService.gradeSubmission(submissionId, score, feedback);
             return ResponseEntity.ok(submission);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }
