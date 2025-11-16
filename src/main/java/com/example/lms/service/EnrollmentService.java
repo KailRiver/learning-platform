@@ -3,6 +3,8 @@ package com.example.lms.service;
 import com.example.lms.entity.Course;
 import com.example.lms.entity.Enrollment;
 import com.example.lms.entity.User;
+import com.example.lms.exception.DuplicateResourceException;
+import com.example.lms.exception.ResourceNotFoundException;
 import com.example.lms.repository.CourseRepository;
 import com.example.lms.repository.EnrollmentRepository;
 import com.example.lms.repository.UserRepository;
@@ -31,14 +33,14 @@ public class EnrollmentService {
     public Enrollment enrollStudent(Long studentId, Long courseId) {
         // Проверяем, не записан ли уже студент
         if (enrollmentRepository.findByStudentIdAndCourseId(studentId, courseId).isPresent()) {
-            throw new RuntimeException("Student is already enrolled in this course");
+            throw new DuplicateResourceException("Student is already enrolled in this course");
         }
 
         User student = userRepository.findById(studentId)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + studentId));
 
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Course not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
 
         Enrollment enrollment = new Enrollment();
         enrollment.setStudent(student);
@@ -51,19 +53,17 @@ public class EnrollmentService {
 
     @Transactional(readOnly = true)
     public List<Enrollment> getStudentEnrollments(Long studentId) {
-        // Используем метод с JOIN FETCH для загрузки всех связей
         return enrollmentRepository.findByStudentIdWithDetails(studentId);
     }
 
     @Transactional(readOnly = true)
     public List<Enrollment> getCourseEnrollments(Long courseId) {
-        // Используем метод с JOIN FETCH для загрузки всех связей
         return enrollmentRepository.findByCourseIdWithDetails(courseId);
     }
 
     public void unenrollStudent(Long studentId, Long courseId) {
         Enrollment enrollment = enrollmentRepository.findByStudentIdAndCourseId(studentId, courseId)
-                .orElseThrow(() -> new RuntimeException("Enrollment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
 
         enrollmentRepository.delete(enrollment);
     }

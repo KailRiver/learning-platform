@@ -17,37 +17,53 @@ public class LazyLoadingTest {
     private CourseService courseService;
 
     @Test
-    void testLazyInitializationException() {
-        // Создаем и сохраняем курс
+    void testLazyInitializationExceptionThrown() {
+        // Создаем курс
         Course course = new Course();
-        course.setTitle("Test Course");
-        course.setDescription("Test Description");
-
+        course.setTitle("Lazy Test Course");
         Course savedCourse = courseService.saveCourse(course);
 
-        // Открываем новую транзакцию только для получения курса
-        Course detachedCourse = getCourseDetached(savedCourse.getId());
+        // Получаем курс без транзакции - используем существующий метод
+        Course detachedCourse = courseService.getCourseWithDetails(savedCourse.getId());
 
-        // Пытаемся получить модули вне транзакции - должно выбросить исключение
+        // Должно выбросить LazyInitializationException при обращении к ленивой коллекции
         assertThrows(LazyInitializationException.class, () -> {
-            int moduleCount = detachedCourse.getModules().size();
+            // Пытаемся обратиться к ленивой коллекции вне транзакции
+            detachedCourse.getModules().size();
         });
     }
 
+    @Test
     @Transactional
-    protected Course getCourseDetached(Long courseId) {
-        // Получаем курс в рамках транзакции, но возвращаем отсоединенный объект
-        return courseService.getCourseWithDetails(courseId);
+    void testLazyLoadingWorksInTransaction() {
+        // Создаем курс
+        Course course = new Course();
+        course.setTitle("Lazy Test Course 2");
+        Course savedCourse = courseService.saveCourse(course);
+
+        // В транзакции можно безопасно обращаться к ленивым коллекциям
+        Course loadedCourse = courseService.getCourseWithDetails(savedCourse.getId());
+        assertNotNull(loadedCourse.getModules());
+        // Не должно выбрасывать исключение
+        assertEquals(0, loadedCourse.getModules().size());
     }
 
     @Test
-    void testLazyLoadingWithTransactional() {
+    void testDirectLazyAccessThrowsException() {
+        // Альтернативный тест для демонстрации LazyInitializationException
         Course course = new Course();
-        course.setTitle("Another Test Course");
-
+        course.setTitle("Direct Lazy Test");
         Course savedCourse = courseService.saveCourse(course);
 
-        assertNotNull(savedCourse.getModules());
-        assertEquals(0, savedCourse.getModules().size());
+        // Получаем курс обычным способом (без JOIN FETCH)
+        Course simpleCourse = courseService.getAllCourses().stream()
+                .filter(c -> c.getId().equals(savedCourse.getId()))
+                .findFirst()
+                .orElseThrow();
+
+        // Должно выбросить исключение при доступе к ленивой коллекции
+        assertThrows(LazyInitializationException.class, () -> {
+            simpleCourse.getModules().isEmpty();
+        });
     }
 }

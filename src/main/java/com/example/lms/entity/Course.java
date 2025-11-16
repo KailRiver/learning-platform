@@ -1,5 +1,6 @@
 package com.example.lms.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,12 +28,15 @@ public class Course {
     private User teacher;
 
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<CourseModule> modules = new ArrayList<>();
 
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Enrollment> enrollments = new ArrayList<>();
 
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<CourseReview> reviews = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -45,7 +49,7 @@ public class Course {
 
     private LocalDate startDate;
     private LocalDate endDate;
-    private Integer duration; // в неделях
+    private Integer duration;
     private Boolean isPublished = false;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -61,7 +65,7 @@ public class Course {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // Конструкторы, геттеры и сеттеры
+    // Конструкторы
     public Course() {}
 
     public Course(String title, String description) {
@@ -69,7 +73,7 @@ public class Course {
         this.description = description;
     }
 
-    // Геттеры и сеттеры для всех полей...
+    // Геттеры и сеттеры
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getTitle() { return title; }

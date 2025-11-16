@@ -1,6 +1,8 @@
 package com.example.lms.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,30 +14,41 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Name is mandatory")
+    @Size(min = 2, max = 100)
     private String name;
 
+    @NotBlank(message = "Email is mandatory")
+    @Email(message = "Email should be valid")
     @Column(unique = true)
     private String email;
 
+    @NotNull(message = "Role is mandatory")
     @Enumerated(EnumType.STRING)
-    private Role role; // STUDENT, TEACHER, ADMIN
+    private Role role;
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnore
     private Profile profile;
 
     @OneToMany(mappedBy = "teacher", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Course> coursesTaught = new ArrayList<>();
 
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Enrollment> enrollments = new ArrayList<>();
 
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Submission> submissions = new ArrayList<>();
 
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<QuizSubmission> quizSubmissions = new ArrayList<>();
 
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<CourseReview> reviews = new ArrayList<>();
 
     private LocalDateTime createdAt;

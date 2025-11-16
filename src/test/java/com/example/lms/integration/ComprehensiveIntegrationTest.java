@@ -23,6 +23,7 @@ public class ComprehensiveIntegrationTest {
     @Autowired private CourseModuleRepository courseModuleRepository;
     @Autowired private LessonRepository lessonRepository;
     @Autowired private AssignmentRepository assignmentRepository;
+    @Autowired private UserRepository userRepository;
 
     @Test
     void testCompleteStudentJourney() {
