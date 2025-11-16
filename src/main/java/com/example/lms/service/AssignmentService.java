@@ -34,14 +34,8 @@ public class AssignmentService {
 
     @Transactional(readOnly = true)
     public List<Assignment> getAssignmentsByLesson(Long lessonId) {
-        List<Assignment> assignments = assignmentRepository.findByLessonId(lessonId);
-        // Явно инициализируем связи для безопасной сериализации
-        assignments.forEach(assignment -> {
-            if (assignment.getLesson() != null) {
-                assignment.getLesson().getTitle(); // Инициализируем урок
-            }
-        });
-        return assignments;
+
+        return assignmentRepository.findByLessonIdWithDetails(lessonId);
     }
 
     public Submission submitAssignment(Long assignmentId, Long studentId, String content) {
@@ -65,32 +59,14 @@ public class AssignmentService {
 
     @Transactional(readOnly = true)
     public List<Submission> getSubmissionsByAssignment(Long assignmentId) {
-        List<Submission> submissions = submissionRepository.findByAssignmentId(assignmentId);
-        // Инициализируем связи
-        submissions.forEach(submission -> {
-            if (submission.getStudent() != null) {
-                submission.getStudent().getName();
-            }
-            if (submission.getAssignment() != null) {
-                submission.getAssignment().getTitle();
-            }
-        });
-        return submissions;
+
+        return submissionRepository.findByAssignmentIdWithDetails(assignmentId);
     }
 
     @Transactional(readOnly = true)
     public List<Submission> getSubmissionsByStudent(Long studentId) {
-        List<Submission> submissions = submissionRepository.findByStudentId(studentId);
-        // Инициализируем связи
-        submissions.forEach(submission -> {
-            if (submission.getStudent() != null) {
-                submission.getStudent().getName();
-            }
-            if (submission.getAssignment() != null) {
-                submission.getAssignment().getTitle();
-            }
-        });
-        return submissions;
+
+        return submissionRepository.findByStudentIdWithDetails(studentId);
     }
 
     public Submission gradeSubmission(Long submissionId, Integer score, String feedback) {
